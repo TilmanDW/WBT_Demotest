@@ -1,14 +1,8 @@
+// script.js
 document.addEventListener('DOMContentLoaded', function() {
     const chatContainer = document.getElementById('chatContainer');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
-
-    // Use a free model from Hugging Face
-    const API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium";
-    
-    // You'll need to replace this with your own Hugging Face API key
-    // Get one for free at https://huggingface.co/settings/tokens
-    const API_KEY = "YOUR_HUGGING_FACE_API_KEY";
 
     sendBtn.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function(e) {
@@ -31,27 +25,29 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show loading indicator
         const loadingId = addMessage('Thinking...', 'bot');
 
-        // Call API
-        fetch(API_URL, {
+        // Call your serverless API endpoint
+        fetch('/api/llm', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${API_KEY}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                inputs: message,
-                options: {
-                    wait_for_model: true
-                }
-            })
+            body: JSON.stringify({ prompt: message })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             // Remove loading message
             document.getElementById(loadingId).remove();
             
+            // Extract response text
+            const botResponse = data[0]?.generated_text || 'No response generated.';
+            
             // Add bot response
-            addMessage(data[0].generated_text, 'bot');
+            addMessage(botResponse, 'bot');
         })
         .catch(error => {
             // Remove loading message
