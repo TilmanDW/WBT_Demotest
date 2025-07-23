@@ -1,8 +1,13 @@
-// api/llm.js
+// api/llm.js - updated version
 export default async function handler(req, res) {
+  // Make sure to properly handle OPTIONS requests for CORS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   // Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed', method: req.method });
   }
 
   try {
@@ -26,6 +31,8 @@ export default async function handler(req, res) {
     );
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Hugging Face API error:', errorText);
       throw new Error(`API call failed: ${response.statusText}`);
     }
 
