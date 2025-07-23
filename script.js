@@ -1,4 +1,4 @@
-// script.js
+// script.js with improved error handling
 document.addEventListener('DOMContentLoaded', function() {
     const chatContainer = document.getElementById('chatContainer');
     const userInput = document.getElementById('userInput');
@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show loading indicator
         const loadingId = addMessage('Thinking...', 'bot');
 
+        console.log('Sending request to API with prompt:', message);
+
         // Call your serverless API endpoint
         fetch('/api/llm', {
             method: 'POST',
@@ -34,28 +36,38 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({ prompt: message })
         })
         .then(response => {
+            console.log('API Response status:', response.status);
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                return response.text().then(text => {
+                    console.error('API Error details:', text);
+                    throw new Error(`API error: ${response.status} ${text}`);
+                });
             }
             return response.json();
         })
         .then(data => {
+            console.log('API Response data:', data);
+            
             // Remove loading message
             document.getElementById(loadingId).remove();
             
-            // Extract response text
-            const botResponse = data[0]?.generated_text || 'No response generated.';
-            
-            // Add bot response
-            addMessage(botResponse, 'bot');
+            // Check if data has the expected structure
+            if (data && Array.isArray(data) && data.length > 0 && data[0].generated_text) {
+                // Add bot response
+                addMessage(data[0].generated_text, 'bot');
+            } else {
+                console.error('Unexpected API response format:', data);
+                addMessage("The AI model returned an unexpected response format. Please try again.", 'bot');
+            }
         })
         .catch(error => {
+            console.error('Error details:', error);
+            
             // Remove loading message
             document.getElementById(loadingId).remove();
             
-            // Show error
-            addMessage('Sorry, there was an error. Please try again.', 'bot');
-            console.error('Error:', error);
+            // Show detailed error
+            addMessage(`Sorry, there was an error: ${error.message}`, 'bot');
         });
     }
 
