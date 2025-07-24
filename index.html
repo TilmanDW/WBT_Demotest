@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Demo: Text Transformation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LLM Text Transformation Demo</h1>
+            <p>Experience the power of Large Language Models with text transformation</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <h2>Enter or Select Text</h2>
+                <div class="text-input-container">
+                    <textarea id="userText" placeholder="Enter your text here or select an example..."></textarea>
+                    <div class="examples">
+                        <h3>Example Texts:</h3>
+                        <button id="example1" class="example-btn">Charlie Chaplin's Freedom Speech</button>
+                        <button id="example2" class="example-btn">Ode an die Tütensuppe</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <h2>Transform Your Text</h2>
+                <div class="buttons">
+                    <button id="summarize" class="action-btn">Summarize</button>
+                    <button id="reformat" class="action-btn">Reformat</button>
+                    <button id="adjust" class="action-btn">Adjust Style</button>
+                </div>
+            </div>
+
+            <div class="results">
+                <h2>Results</h2>
+                <div id="loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Processing with LLM...</p>
+                </div>
+                <div id="resultText" class="result-content"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by Hugging Face, GitHub, and Vercel</p>
+            <p>Using Mistral AI open-source models</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
