@@ -3,54 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Demo: Text Transformation</title>
+    <title>LLM Text Processing Demo</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>LLM Text Transformation Demo</h1>
-            <p>Experience the power of Large Language Models with text transformation</p>
+            <h1>Experience the Power of LLMs</h1>
+            <p>Enter your text or choose an example to see what language models can do with content.</p>
         </header>
 
         <main>
             <div class="input-section">
-                <h2>Enter or Select Text</h2>
+                <h2>Your Text</h2>
                 <div class="text-input-container">
-                    <textarea id="userText" placeholder="Enter your text here or select an example..."></textarea>
-                    <div class="examples">
-                        <h3>Example Texts:</h3>
-                        <button id="example1" class="example-btn">Charlie Chaplin's Freedom Speech</button>
-                        <button id="example2" class="example-btn">Ode an die Tütensuppe</button>
+                    <textarea id="userText" placeholder="Enter your text here or choose an example..."></textarea>
+                    <div class="example-buttons">
+                        <button id="example1Btn">Load Example 1: Chaplin's Freedom Speech</button>
+                        <button id="example2Btn">Load Example 2: Ode an die Tütensuppe</button>
                     </div>
                 </div>
             </div>
 
-            <div class="actions">
+            <div class="actions-section">
                 <h2>Transform Your Text</h2>
-                <div class="buttons">
-                    <button id="summarize" class="action-btn">Summarize</button>
-                    <button id="reformat" class="action-btn">Reformat</button>
-                    <button id="adjust" class="action-btn">Adjust Style</button>
+                <div class="action-buttons">
+                    <button id="summarizeBtn" class="action-btn">Summarize</button>
+                    <button id="reformatBtn" class="action-btn">Reformat as Bullet Points</button>
+                    <button id="simplifyBtn" class="action-btn">Simplify Language</button>
+                    <button id="creativeBtn" class="action-btn">Make it Creative</button>
                 </div>
             </div>
 
-            <div class="results">
-                <h2>Results</h2>
-                <div id="loading" class="loading hidden">
-                    <div class="spinner"></div>
-                    <p>Processing with LLM...</p>
-                </div>
-                <div id="resultText" class="result-content"></div>
+            <div class="output-section">
+                <h2>Result</h2>
+                <div id="loadingIndicator" class="loading hidden">Processing... <div class="spinner"></div></div>
+                <div id="outputText" class="output"></div>
             </div>
         </main>
 
         <footer>
-            <p>Powered by Hugging Face, GitHub, and Vercel</p>
-            <p>Using Mistral AI open-source models</p>
+            <p>Powered by open-source LLMs from Hugging Face • Built with GitHub and Vercel</p>
         </footer>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
