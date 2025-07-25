@@ -1,5 +1,5 @@
-// api/process-text.js - Using ESM syntax
-export default async function handler(req, res) {
+// api/process-text.js - Using CommonJS syntax
+module.exports = async function handler(req, res) {
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -22,6 +22,7 @@ export default async function handler(req, res) {
 
     // Try a more reliable model from Hugging Face
     try {
+      const fetch = require('node-fetch');
       const response = await fetch(
         "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
         {
@@ -56,4 +57,4 @@ export default async function handler(req, res) {
     console.error('Error processing request:', error);
     return res.status(500).json({ error: `An error occurred: ${error.message}` });
   }
-}
+};
