@@ -84,7 +84,6 @@ function hideLoading() {
     buttons.forEach(btn => btn.disabled = false);
 }
 
-// Process text with different operations
 async function processText(operation) {
     const inputText = document.getElementById('inputText').value.trim();
     
@@ -96,33 +95,14 @@ async function processText(operation) {
     showLoading();
 
     try {
-        let prompt = '';
-        
-        switch(operation) {
-            case 'summarize':
-                prompt = `Please provide a concise summary of the following text in 2-3 sentences:\n\n${inputText}`;
-                break;
-            case 'reformat':
-                prompt = `Please reformat the following text into clear bullet points or structured format:\n\n${inputText}`;
-                break;
-            case 'adjust':
-                prompt = `Please rewrite the following text in a more professional and formal tone:\n\n${inputText}`;
-                break;
-        }
-
-        const response = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium', {
+        const response = await fetch('/api/process', {
             method: 'POST',
             headers: {
-                'Authorization': 'Bearer hf_your_token_here', // We'll handle this differently
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                inputs: prompt,
-                parameters: {
-                    max_new_tokens: 250,
-                    temperature: 0.7,
-                    return_full_text: false
-                }
+                text: inputText,
+                operation: operation
             })
         });
 
@@ -130,28 +110,18 @@ async function processText(operation) {
             throw new Error('API request failed');
         }
 
-        const result = await response.json();
-        let outputText = '';
-        
-        if (result && result[0] && result[0].generated_text) {
-            outputText = result[0].generated_text.trim();
-        } else {
-            // Fallback for demo purposes
-            outputText = getDemoResponse(operation, inputText);
-        }
-
-        document.getElementById('outputText').textContent = outputText;
+        const data = await response.json();
+        document.getElementById('outputText').textContent = data.result;
 
     } catch (error) {
-        console.log('Using demo mode due to API limitations');
-        // Use demo responses when API is not available
+        console.log('Error processing text:', error);
+        // Fallback to demo responses
         const demoResponse = getDemoResponse(operation, inputText);
         document.getElementById('outputText').textContent = demoResponse;
     }
 
     hideLoading();
 }
-
 // Demo responses for when API is not available
 function getDemoResponse(operation, inputText) {
     const wordCount = inputText.split(' ').length;
