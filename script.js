@@ -17,77 +17,33 @@ Und die Vielfalt! Hühnersuppe, Tomatensuppe, Pilzsuppe, asiatische Nudelsuppen 
 Manche mögen die Nase rümpfen und von "künstlich" oder "ungesund" sprechen. Aber ich sage: Die Tütensuppe ist ein Triumph der menschlichen Kreativität und des Fortschritts!`
 };
 
-// Configuration
-const CONFIG = {
-    // We'll use environment variable or fallback to public endpoint
-    API_TOKEN: null, // Will be set from environment
-    MODELS: {
-        summarize: 'microsoft/DialoGPT-medium',
-        reformat: 'microsoft/DialoGPT-medium', 
-        adjust: 'microsoft/DialoGPT-medium'
-    }
-};
-
-// Load example text with animation
+// Load example text
 function loadExample(exampleNumber) {
+    console.log('Loading example:', exampleNumber);
     const textArea = document.getElementById('inputText');
-    textArea.value = '';
-    
-    // Simulate typing effect
-    const text = examples[exampleNumber];
-    let i = 0;
-    const typeInterval = setInterval(() => {
-        textArea.value += text.charAt(i);
-        i++;
-        if (i >= text.length) {
-            clearInterval(typeInterval);
-            showStatus('Example loaded successfully!', 'success');
-        }
-    }, 10);
+    if (examples[exampleNumber]) {
+        textArea.value = examples[exampleNumber];
+        console.log('Example loaded successfully');
+    } else {
+        console.error('Example not found:', exampleNumber);
+    }
 }
 
-// Clear all content with confirmation
+// Clear all content
 function clearAll() {
-    if (document.getElementById('inputText').value.trim() || document.getElementById('output').textContent.trim()) {
-        if (confirm('Are you sure you want to clear all content?')) {
-            document.getElementById('inputText').value = '';
-            document.getElementById('output').textContent = '';
-            showStatus('Content cleared!', 'success');
-        }
-    }
-}
-
-// Show status messages
-function showStatus(message, type) {
-    // Remove existing status
-    const existingStatus = document.querySelector('.status-indicator');
-    if (existingStatus) {
-        existingStatus.remove();
-    }
-    
-    const status = document.createElement('div');
-    status.className = `status-indicator status-${type}`;
-    status.textContent = message;
-    document.body.appendChild(status);
-    
-    setTimeout(() => {
-        if (status.parentNode) {
-            status.remove();
-        }
-    }, 3000);
+    console.log('Clearing all content');
+    document.getElementById('inputText').value = '';
+    document.getElementById('output').textContent = 'Content cleared. Enter some text and try the AI functions above.';
 }
 
 // Process text with different prompts
 async function processText(action) {
+    console.log('Processing text with action:', action);
+    
     const inputText = document.getElementById('inputText').value.trim();
     
     if (!inputText) {
-        showStatus('Please enter some text first!', 'error');
-        return;
-    }
-
-    if (inputText.length > 2000) {
-        showStatus('Text is too long. Please use shorter text (max 2000 characters).', 'error');
+        alert('Please enter some text first!');
         return;
     }
 
@@ -101,35 +57,25 @@ async function processText(action) {
     buttons.forEach(btn => btn.disabled = true);
 
     let prompt = '';
-    let actionName = '';
-    
     switch(action) {
         case 'summarize':
-            prompt = `Summarize this text in 2-3 sentences:\n\n${inputText}\n\nSummary:`;
-            actionName = 'Summarization';
+            prompt = `Please provide a brief summary of the following text:\n\n${inputText}`;
             break;
         case 'reformat':
-            prompt = `Rewrite this text with better structure and formatting:\n\n${inputText}\n\nReformatted:`;
-            actionName = 'Reformatting';
+            prompt = `Please reformat and improve the structure of the following text:\n\n${inputText}`;
             break;
         case 'adjust':
-            prompt = `Rewrite this text in a more professional tone:\n\n${inputText}\n\nProfessional version:`;
-            actionName = 'Tone adjustment';
+            prompt = `Please rewrite the following text in a more professional tone:\n\n${inputText}`;
             break;
     }
 
     try {
-        const response = await queryHuggingFace(prompt, action);
-        if (response && response.trim()) {
-            output.textContent = response;
-            showStatus(`${actionName} completed successfully!`, 'success');
-        } else {
-            throw new Error('Empty response from AI model');
-        }
+        // Simulate API call for now - replace with real API later
+        await simulateAPICall(prompt, output);
+        
     } catch (error) {
         console.error('Error:', error);
-        output.textContent = `Sorry, there was an error processing your request: ${error.message}\n\nThis might be due to:\n- Model loading (please try again in a moment)\n- Rate limiting\n- Network issues\n\nPlease try again or use shorter text.`;
-        showStatus(`${actionName} failed. Please try again.`, 'error');
+        output.textContent = `Error: ${error.message}`;
     } finally {
         // Hide loading and enable buttons
         loading.classList.add('hidden');
@@ -137,82 +83,71 @@ async function processText(action) {
     }
 }
 
-// Updated function to use our API endpoint
-async function queryHuggingFace(prompt, action) {
-    const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            prompt: prompt,
-            action: action
-        })
-    });
+// Simulate API call (temporary solution)
+async function simulateAPICall(prompt, outputElement) {
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const inputText = document.getElementById('inputText').value.trim();
+    const action = prompt.includes('summary') ? 'summarize' : 
+                  prompt.includes('reformat') ? 'reformat' : 'adjust';
+    
+    let result = '';
+    
+    switch(action) {
+        case 'summarize':
+            result = `SUMMARY: This is a simulated summary of your text. The main points include the key themes and ideas presented. Your original text contained ${inputText.split(' ').length} words, and this summary captures the essential message in a more concise format.
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'API request failed');
-    }
+[Note: This is a demo response. Connect your Hugging Face API token for real AI processing!]`;
+            break;
+            
+        case 'reformat':
+            result = `REFORMATTED VERSION:
 
-    const data = await response.json();
-    const result = data.result;
-    
-    // Handle different response formats
-    if (Array.isArray(result) && result[0]) {
-        if (result[0].generated_text) {
-            return cleanResponse(result[0].generated_text, prompt);
-        } else if (result[0].summary_text) {
-            return result[0].summary_text;
-        }
-    } else if (result.generated_text) {
-        return cleanResponse(result.generated_text, prompt);
+Your text has been restructured for better readability:
+
+• Key points have been organized
+• Paragraphs have been improved
+• Flow and structure enhanced
+• Clarity increased
+
+[Note: This is a demo response. Connect your Hugging Face API token for real AI processing!]`;
+            break;
+            
+        case 'adjust':
+            result = `PROFESSIONAL VERSION:
+
+Your text has been adjusted to maintain a more professional tone while preserving the original meaning. The language has been refined, formal expressions have been incorporated, and the overall presentation has been enhanced for professional contexts.
+
+[Note: This is a demo response. Connect your Hugging Face API token for real AI processing!]`;
+            break;
     }
     
-    return 'Unable to process the text. Please try again.';
-}
-// Clean AI response
-function cleanResponse(response, originalPrompt) {
-    if (!response) return '';
-    
-    // Remove the original prompt if it's included in the response
-    let cleaned = response.replace(originalPrompt, '').trim();
-    
-    // Remove common AI artifacts
-    cleaned = cleaned.replace(/^(Summary:|Reformatted:|Professional version:|Here is|Here's)/i, '').trim();
-    
-    // Remove extra whitespace and newlines
-    cleaned = cleaned.replace(/\n\s*\n/g, '\n').trim();
-    
-    return cleaned || 'Unable to process the text. Please try again with different content.';
+    outputElement.textContent = result;
 }
 
-// Initialize the application
+// Test if JavaScript is loaded
+console.log('Script loaded successfully!');
+
+// Add event listeners when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Try to get API token from environment (this will work in Vercel)
-    // Note: In client-side JS, we can't access process.env directly
-    // The token will be set via Vercel environment variables
+    console.log('DOM loaded, adding event listeners');
     
-    console.log('LLM Text Demo initialized');
-    showStatus('Welcome! Load an example or enter your own text.', 'success');
-});
-
-// Add keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey || e.metaKey) {
-        switch(e.key) {
-            case '1':
-                e.preventDefault();
-                loadExample(1);
-                break;
-            case '2':
-                e.preventDefault();
-                loadExample(2);
-                break;
-            case 'Enter':
-                e.preventDefault();
-                processText('summarize');
-                break;
-        }
+    // Test if elements exist
+    const inputText = document.getElementById('inputText');
+    const output = document.getElementById('output');
+    
+    if (inputText) {
+        console.log('Input text element found');
+        inputText.placeholder = "Enter your text here or click one of the example buttons above...";
+    } else {
+        console.error('Input text element not found');
+    }
+    
+    if (output) {
+        console.log('Output element found');
+        output.textContent = "Results will appear here after processing...";
+    } else {
+        console.error('Output element not found');
     }
 });
