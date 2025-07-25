@@ -52,49 +52,36 @@ Und wenn der Tag der Apokalypse kommt, wenn die Bomben fallen, wenn der Weltunte
         userTextArea.value = exampleText2;
     });
 
-    // Function to call Hugging Face Inference API
-    async function callLLM(text, instruction) {
-        showLoading();
-        
-        try {
-            // Replace with your actual Hugging Face API token
-            const API_TOKEN = "hf_your_huggingface_token"; // You'll need to add your token here
-            
-            // Using Mistral-7B model
-            const response = await fetch(
-                "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
-                {
-                    headers: {
-                        "Authorization": `Bearer ${API_TOKEN}`,
-                        "Content-Type": "application/json"
-                    },
-                    method: "POST",
-                    body: JSON.stringify({
-                        inputs: `<s>[INST] ${instruction}:\n\n${text} [/INST]`
-                    })
-                }
-            );
+// Replaced existing callLLM function with this one
+async function callLLM(text, instruction) {
+    showLoading();
+    
+    try {
+        // Using our own API endpoint instead of directly calling Hugging Face
+        const response = await fetch("/api/process-text", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                text: text,
+                instruction: instruction
+            })
+        });
 
-            const result = await response.json();
-            hideLoading();
-            
-            if (result.error) {
-                return `Error: ${result.error}`;
-            }
-            
-            // Extract only the generated text part, removing the instruction
-            let generatedText = result[0].generated_text;
-            const instructionEnd = generatedText.indexOf('[/INST]');
-            if (instructionEnd !== -1) {
-                generatedText = generatedText.substring(instructionEnd + 7).trim();
-            }
-            
-            return generatedText;
-        } catch (error) {
-            hideLoading();
-            return `An error occurred: ${error.message}. Please try again.`;
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.error) {
+            return `Error: ${result.error}`;
         }
+        
+        return result.output;
+    } catch (error) {
+        hideLoading();
+        return `An error occurred: ${error.message}. Please try again.`;
     }
+}
 
     // Show/hide loading indicator
     function showLoading() {
