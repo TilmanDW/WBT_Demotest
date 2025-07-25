@@ -3,26 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Text Demo</title>
-    <link rel="stylesheet" href="style.css">
+    <title>AI Text Processor Demo</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>LLM Text Processing Demo</h1>
-        <p>Experience the power of AI text processing with summarization, reformatting, and text adjustment.</p>
-        
-        <div class="input-section">
-            <h2>Enter Your Text</h2>
-            <div class="examples">
-                <h3>Or choose an example:</h3>
-                <button onclick="loadExample(1)" class="example-btn">Charlie Chaplin Speech</button>
-                <button onclick="loadExample(2)" class="example-btn">Ode to Instant Soup</button>
-            </div>
-            <textarea id="inputText" placeholder="Enter your text here..."></textarea>
-        </div>
+        <header>
+            <h1>🤖 AI Text Processor</h1>
+            <p>Experience the power of AI with text summarization, reformatting, and tone adjustment</p>
+        </header>
 
-        <div class="actions">
-            <button onclick="processText('summarize')" class="action-btn">Summarize</button>
-            <button onclick="processText('reformat')" class="action-btn">Reformat</button>
-            <button onclick="processText('adjust')" class="action-btn">Adjust Tone</button>
-            <button onclick="clearAll()" class="
+        <div class="main-content">
+            <div class="input-section">
+                <h2>Enter Your Text</h2>
+                <div class="example-buttons">
+                    <button class="example-btn" onclick="loadExample(1)">📜 Chaplin's Freedom Speech</button>
+                    <button class="example-btn" onclick="loadExample(2)">🍜 Ode to Instant Soup</button>
+                    <button class="clear-btn" onclick="clearText()">🗑️ Clear All</button>
+                </div>
+                <textarea id="inputText" placeholder="Paste your text here or use one of the examples above..."></textarea>
+            </div>
+
+            <div class="controls-section">
+                <h2>AI Processing Options</h2>
+                <div class="button-grid">
+                    <button class="process-btn" onclick="processText('summarize')" id="summarizeBtn">
+                        📋 Summarize
+                    </button>
+                    <button class="process-btn" onclick="processText('reformat')" id="reformatBtn">
+                        📝 Reformat
+                    </button>
+                    <button class="process-btn" onclick="processText('adjust')" id="adjustBtn">
+                        🎭 Adjust Tone
+                    </button>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2>AI Output</h2>
+                <div class="output-container">
+                    <div id="loadingSpinner" class="spinner" style="display: none;">
+                        <div class="spinner-circle"></div>
+                        <p>AI is processing your text...</p>
+                    </div>
+                    <div id="outputText" class="output-text">
+                        Your processed text will appear here...
+                    </div>
+                    <button id="copyBtn" class="copy-btn" onclick="copyOutput()" style="display: none;">
+                        📋 Copy Result
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
