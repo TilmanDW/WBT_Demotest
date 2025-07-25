@@ -52,12 +52,12 @@ Und wenn der Tag der Apokalypse kommt, wenn die Bomben fallen, wenn der Weltunte
         userTextArea.value = exampleText2;
     });
 
-// Replaced existing callLLM function with this one
+// Function to call our API endpoint
 async function callLLM(text, instruction) {
     showLoading();
     
     try {
-        // Using our own API endpoint instead of directly calling Hugging Face
+        // Call our API endpoint
         const response = await fetch("/api/process-text", {
             method: "POST",
             headers: {
@@ -68,16 +68,26 @@ async function callLLM(text, instruction) {
                 instruction: instruction
             })
         });
-
+        
+        // Check if the response is OK
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API request failed (${response.status}): ${errorText}`);
+        }
+        
+        // Try to parse the JSON response
         const result = await response.json();
+        
+        // Hide the loading indicator
         hideLoading();
         
         if (result.error) {
             return `Error: ${result.error}`;
         }
         
-        return result.output;
+        return result.output || "Processing complete, but no output text was returned.";
     } catch (error) {
+        console.error("Error in callLLM:", error);
         hideLoading();
         return `An error occurred: ${error.message}. Please try again.`;
     }
