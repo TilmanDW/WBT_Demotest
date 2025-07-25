@@ -1,4 +1,4 @@
-// api/process-text.js - Updated with alternative models
+// api/process-text.js - Using ESM syntax
 export default async function handler(req, res) {
   // Only allow POST requests
   if (req.method !== 'POST') {
@@ -20,67 +20,38 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Server configuration error: Missing API token' });
     }
 
-    // List of models to try in order (some are more accessible than others)
-    const models = [
-      "meta-llama/Meta-Llama-3-8B-Instruct",
-      "mistralai/Mistral-7B-Instruct-v0.2", 
-      "google/flan-t5-large",
-      "tiiuae/falcon-7b-instruct"
-    ];
-
-    let result;
-    let errorMessages = [];
-    
-    // Try each model until one works
-    for (const model of models) {
-      try {
-        console.log(`Attempting to use model: ${model}`);
-        
-        const response = await fetch(
-          `https://api-inference.huggingface.co/models/${model}`,
-          {
-            headers: {
-              "Authorization": `Bearer ${API_TOKEN}`,
-              "Content-Type": "application/json"
-            },
-            method: "POST",
-            body: JSON.stringify({
-              inputs: `<s>[INST] ${instruction}:\n\n${text} [/INST]`
-            })
-          }
-        );
-
-        result = await response.json();
-        
-        // If there's no error, we found a working model
-        if (!result.error) {
-          console.log(`Successfully used model: ${model}`);
-          break;
-        } else {
-          errorMessages.push(`${model}: ${result.error}`);
+    // Try a more reliable model from Hugging Face
+    try {
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
+        {
+          headers: {
+            "Authorization": `Bearer ${API_TOKEN}`,
+            "Content-Type": "application/json"
+          },
+          method: "POST",
+          body: JSON.stringify({
+            inputs: text,
+            parameters: {
+              max_length: 100,
+              min_length: 30
+            }
+          })
         }
-      } catch (modelError) {
-        errorMessages.push(`${model}: ${modelError.message}`);
+      );
+
+      const result = await response.json();
+      
+      if (result.error) {
+        console.error('Error from Hugging Face API:', result.error);
+        return res.status(500).json({ error: `Hugging Face API error: ${result.error}` });
       }
+      
+      return res.status(200).json({ output: result[0].summary_text });
+    } catch (modelError) {
+      console.error('Error calling model:', modelError);
+      return res.status(500).json({ error: `Model error: ${modelError.message}` });
     }
-    
-    // If we tried all models and all had errors
-    if (result.error) {
-      console.error('All models failed:', errorMessages);
-      return res.status(500).json({ 
-        error: `Failed to access any model. Last error: ${result.error}`,
-        allErrors: errorMessages
-      });
-    }
-    
-    // Extract the generated text
-    let generatedText = result[0].generated_text;
-    const instructionEnd = generatedText.indexOf('[/INST]');
-    if (instructionEnd !== -1) {
-      generatedText = generatedText.substring(instructionEnd + 7).trim();
-    }
-    
-    return res.status(200).json({ output: generatedText });
   } catch (error) {
     console.error('Error processing request:', error);
     return res.status(500).json({ error: `An error occurred: ${error.message}` });
