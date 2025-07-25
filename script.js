@@ -30,4 +30,123 @@ Oh wie ich es liebe, Dich aufzureißen, Dein Pulver mit dem heißen Wasser zu ve
 
 Sogar in Japan hab ich Dich gefunden, meine Tütensuppe. Auch dort warst Du meine erste Wahl, wenn der Bauch knurrte und der Geldbeutel leer war. Ob als Ramen-Version im "Cup", oder klassisch mit Plastik verschweißt. Du bleibst in meinem Herzen. Egal wie alt ich werde, Du bist immer da.
 
-Und wenn der Tag der Apokalypse kommt, wenn die Bomben fallen, wenn der Weltuntergang bevorsteht, werde ich einen Vorrat von Dir
+Und wenn der Tag der Apokalypse kommt, wenn die Bomben fallen, wenn der Weltuntergang bevorsteht, werde ich einen Vorrat von Dir im Keller haben, Tütensuppe!`;
+
+    // DOM Elements
+    const userTextArea = document.getElementById('userText');
+    const example1Btn = document.getElementById('example1Btn');
+    const example2Btn = document.getElementById('example2Btn');
+    const summarizeBtn = document.getElementById('summarizeBtn');
+    const reformatBtn = document.getElementById('reformatBtn');
+    const simplifyBtn = document.getElementById('simplifyBtn');
+    const creativeBtn = document.getElementById('creativeBtn');
+    const outputText = document.getElementById('outputText');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    // Load example texts
+    example1Btn.addEventListener('click', () => {
+        userTextArea.value = exampleText1;
+    });
+
+    example2Btn.addEventListener('click', () => {
+        userTextArea.value = exampleText2;
+    });
+
+    // Function to call Hugging Face Inference API
+    async function callLLM(text, instruction) {
+        showLoading();
+        
+        try {
+            // Replace with your actual Hugging Face API token
+            const API_TOKEN = "hf_your_huggingface_token"; // You'll need to add your token here
+            
+            // Using Mistral-7B model
+            const response = await fetch(
+                "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+                {
+                    headers: {
+                        "Authorization": `Bearer ${API_TOKEN}`,
+                        "Content-Type": "application/json"
+                    },
+                    method: "POST",
+                    body: JSON.stringify({
+                        inputs: `<s>[INST] ${instruction}:\n\n${text} [/INST]`
+                    })
+                }
+            );
+
+            const result = await response.json();
+            hideLoading();
+            
+            if (result.error) {
+                return `Error: ${result.error}`;
+            }
+            
+            // Extract only the generated text part, removing the instruction
+            let generatedText = result[0].generated_text;
+            const instructionEnd = generatedText.indexOf('[/INST]');
+            if (instructionEnd !== -1) {
+                generatedText = generatedText.substring(instructionEnd + 7).trim();
+            }
+            
+            return generatedText;
+        } catch (error) {
+            hideLoading();
+            return `An error occurred: ${error.message}. Please try again.`;
+        }
+    }
+
+    // Show/hide loading indicator
+    function showLoading() {
+        loadingIndicator.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+        loadingIndicator.classList.add('hidden');
+    }
+
+    // Button click handlers
+    summarizeBtn.addEventListener('click', async () => {
+        const text = userTextArea.value;
+        if (!text.trim()) {
+            outputText.innerHTML = 'Please enter or select some text first.';
+            return;
+        }
+        
+        const result = await callLLM(text, "Summarize the following text in a concise way");
+        outputText.innerHTML = result;
+    });
+
+    reformatBtn.addEventListener('click', async () => {
+        const text = userTextArea.value;
+        if (!text.trim()) {
+            outputText.innerHTML = 'Please enter or select some text first.';
+            return;
+        }
+        
+        const result = await callLLM(text, "Reformat the following text as a list of bullet points capturing the key ideas");
+        outputText.innerHTML = result;
+    });
+
+    simplifyBtn.addEventListener('click', async () => {
+        const text = userTextArea.value;
+        if (!text.trim()) {
+            outputText.innerHTML = 'Please enter or select some text first.';
+            return;
+        }
+        
+        const result = await callLLM(text, "Simplify the following text to be easier to understand, using simpler language");
+        outputText.innerHTML = result;
+    });
+
+    creativeBtn.addEventListener('click', async () => {
+        const text = userTextArea.value;
+        if (!text.trim()) {
+            outputText.innerHTML = 'Please enter or select some text first.';
+            return;
+        }
+        
+        const result = await callLLM(text, "Transform the following text into a creative, engaging, and slightly dramatic version while preserving the main ideas");
+        outputText.innerHTML = result;
+    });
+});
