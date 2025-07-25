@@ -137,50 +137,27 @@ async function processText(action) {
     }
 }
 
-// Query Hugging Face API with better error handling
+// Updated function to use our API endpoint
 async function queryHuggingFace(prompt, action) {
-    const model = CONFIG.MODELS[action] || CONFIG.MODELS.summarize;
-    const apiUrl = `https://api-inference.huggingface.co/models/${model}`;
-    
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-    
-    // Add authorization header if token is available
-    if (CONFIG.API_TOKEN) {
-        headers['Authorization'] = `Bearer ${CONFIG.API_TOKEN}`;
-    }
-    
-    const requestBody = {
-        inputs: prompt,
-        parameters: {
-            max_new_tokens: 150,
-            temperature: 0.7,
-            do_sample: true,
-            return_full_text: false
-        },
-        options: {
-            wait_for_model: true
-        }
-    };
-
-    const response = await fetch(apiUrl, {
+    const response = await fetch('/api/generate', {
         method: 'POST',
-        headers: headers,
-        body: JSON.stringify(requestBody)
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            prompt: prompt,
+            action: action
+        })
     });
 
     if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API Error (${response.status}): ${errorText}`);
+        const error = await response.json();
+        throw new Error(error.error || 'API request failed');
     }
 
-    const result = await response.json();
+    const data = await response.json();
+    const result = data.result;
     
-    if (result.error) {
-        throw new Error(result.error);
-    }
-
     // Handle different response formats
     if (Array.isArray(result) && result[0]) {
         if (result[0].generated_text) {
@@ -190,13 +167,10 @@ async function queryHuggingFace(prompt, action) {
         }
     } else if (result.generated_text) {
         return cleanResponse(result.generated_text, prompt);
-    } else if (result[0] && typeof result[0] === 'string') {
-        return cleanResponse(result[0], prompt);
     }
     
-    throw new Error('Unexpected response format from AI model');
+    return 'Unable to process the text. Please try again.';
 }
-
 // Clean AI response
 function cleanResponse(response, originalPrompt) {
     if (!response) return '';
