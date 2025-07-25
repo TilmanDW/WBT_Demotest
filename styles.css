@@ -123,8 +123,6 @@ h1 + p {
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
-    position: relative;
-    overflow: hidden;
 }
 
 .action-btn:hover {
@@ -217,27 +215,6 @@ h1 + p {
 
 .hidden {
     display: none;
-}
-
-.status-indicator {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    border-radius: 25px;
-    color: white;
-    font-weight: 500;
-    font-size: 14px;
-    z-index: 1000;
-    transition: all 0.3s ease;
-}
-
-.status-success {
-    background: linear-gradient(135deg, #48bb78, #38a169);
-}
-
-.status-error {
-    background: linear-gradient(135deg, #f56565, #e53e3e);
 }
 
 @media (max-width: 768px) {
