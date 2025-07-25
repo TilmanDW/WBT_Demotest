@@ -2,7 +2,6 @@
   "name": "llm-demo-website",
   "version": "1.0.0",
   "description": "A simple demo website for LLM text processing",
-  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
